@@ -1,7 +1,7 @@
-function solveSudoku(board){
-    return checkValid(board)&&trySolve(board)
+export function solveSudoku(board,undoStack){
+    return checkValid(board)&&trySolve(board,undefined,undefined,undoStack)
 }
-function trySolve(board,row=0,col=0){
+function trySolve(board,row=0,col=0,undoStack){
     if(row>8||col>8)
         return true
     // calcualate new cell position
@@ -15,61 +15,67 @@ function trySolve(board,row=0,col=0){
        nc=  col+1
     }
     //////
-    if(board[row][col]===0){
+    if(board[row][col].value===0){
         Loop:
         for(let i =1;i<=9;i++){
             //check row
-            if(board[row].includes(i))
-                continue
+            for(let j =0;j<9;j++)
+              {
+                  if(board[row][j].value===i)
+                      continue Loop
+              }
             //check column
             for(let j =0;j<9;j++)
             {
-                if(board[j][col]===i)
+                if(board[j][col].value===i)
                     continue Loop
             }
             //check square
             let found = false
             board.slice(row-row%3,row-row%3+3).forEach(function(elem){
-               if(elem.slice(col-col%3,col-col%3+3).includes(i))
+               if(elem.slice(col-col%3,col-col%3+3).map(elem=>elem.value).includes(i))
                  found=true})
             if(found)
                 continue
           // go to the next cell
-          board[row][col]=i
-          state=  trySolve(board,nr,nc)
-          if(state)
-            return true
+          board[row][col].value=i
+         let  state=  trySolve(board,nr,nc,undoStack)
+          if(state){
+            undoStack.push([row,col,0])
+            return true}
           else
-          board[row][col]=0
+          board[row][col].value=0
         }
         return false
     }
-  return trySolve(board,nr,nc)
+  return trySolve(board,nr,nc,undoStack)
 }
 
 function checkValid(board){
     let problem = false
     board.forEach(function(row,rindex){
+        if(problem)
+          return true
         row.forEach(function(cell,cindex){
-               if(cell===0||problem)
+               if(cell.value===0)
                 return
                 //check row
                 for(let j =0;j<9;j++)
                     {
-                        if(j!=cindex&&board[rindex][j]===cell)
+                        if(j!=cindex&&board[rindex][j].value===cell.value)
                             problem=true
                     }
                 //check column
                 for(let j =0;j<9;j++)
-                {if(j!=rindex&&board[j][cindex]===cell)
+                {if(j!=rindex&&board[j][cindex].value===cell.value)
                         problem=true
                 }
                 //check square
-                board[rindex][cindex]=-cell
+                board[rindex][cindex].value=-cell.value
                 board.slice(rindex-rindex%3,rindex-rindex%3+3).forEach(function(elem){
-                   if(elem.slice(cindex-cindex%3,cindex-cindex%3+3).includes(cell))
+                   if(elem.slice(cindex-cindex%3,cindex-cindex%3+3).includes(cell.value))
                      problem=true})
-                   board[rindex][cindex]=-board[rindex][cindex]
+                   board[rindex][cindex].value=-board[rindex][cindex].value
         })})
     return !problem
 }

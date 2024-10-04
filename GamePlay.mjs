@@ -1,4 +1,5 @@
 import rd from 'readline'
+import { solveSudoku, generateNewSudoku } from './GenerateAndSolve.mjs';
 export function gamePlay(board,undoStack=[],redoStack=[]){
     process.stdout.write("\u001b[2J\u001b[0;0H");
     const readline = rd.createInterface({
@@ -36,17 +37,20 @@ export function gamePlay(board,undoStack=[],redoStack=[]){
             else
             return recursiceReadLine(readline,board)
         case "solve":
-            if(solveSudoku(board))
-            return gamePlay(board,undoStack,redoStack)
-            else
-            return recursiceReadLine(readline,board)
+            undoStack.push("s")
+            if(solveSudoku(board,undoStack)){
+                undoStack.push('s')
+                return gamePlay(board,undoStack,redoStack)}
+            else{
+                undoStack.pop()
+                return recursiceReadLine(readline,board)}
             
         case "rt":
             resetTime()
             break;
         case "new":  
-        let  newboard =   generateNewGame()
-          return gamePlay(newboard,undoStack)
+        let  newboard =   generateNewSudoku()
+          return gamePlay(newboard)
 
           
           
@@ -153,7 +157,13 @@ function deleteCell(board,row,col,undoStack,redoStack,asUndo){
 }
 function undo(board,undoStack,redoStack){
     if(undoStack.length!=0){
-        console.log(undoStack[undoStack.length-1])
+        let solve = false
+        if(undoStack[undoStack.length-1]==='s')
+        {   redoStack.push('s')
+            undoStack.pop()
+            solve=true
+        }
+        while(undoStack[undoStack.length-1]!='s'){
         redoStack.push([undoStack[undoStack.length-1][0],undoStack[undoStack.length-1][1],board[undoStack[undoStack.length-1][0]][undoStack[undoStack.length-1][1]].value])
       
     if(undoStack[undoStack.length-1][2]===0){
@@ -163,10 +173,17 @@ function undo(board,undoStack,redoStack){
         addCell(board,undoStack[undoStack.length-1][2],undoStack[undoStack.length-1][0]+1,undoStack[undoStack.length-1][1]+1,undoStack,redoStack,true)
     }
     undoStack.pop()
+    if(!solve)
+        break
+}
+if(solve){
+   redoStack.push(undoStack.pop())
+}
+
     console.log('undo Done')
     return true
 }
-
+  
 console.log("cannot undo")
 return false
 
@@ -174,7 +191,12 @@ return false
 }
 function redo(board,undoStack,redoStack){
     if(redoStack.length!=0){
-        undoStack.length=0
+        let solve = false
+        if(redoStack[redoStack.length-1]==='s')
+        {   redoStack.pop()
+            solve=true
+        }
+        while(redoStack[redoStack.length-1]!='s'){
         if(redoStack[redoStack.length-1][2]===0){
             deleteCell(board,redoStack[redoStack.length-1][0]+1,redoStack[redoStack.length-1][0]+1,undoStack,redoStack,true)
         }
@@ -182,7 +204,15 @@ function redo(board,undoStack,redoStack){
             addCell(board,redoStack[redoStack.length-1][2],redoStack[redoStack.length-1][0]+1,redoStack[redoStack.length-1][1]+1,undoStack,redoStack,true)
         }
         redoStack.pop()
+    
+      if(!solve)
+        break
+    }
+      if(solve)
+        redoStack.pop()
+    
         console.log('redo Done')
+        undoStack.length=0
         return true
 
     }
