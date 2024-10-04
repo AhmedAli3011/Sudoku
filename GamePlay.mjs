@@ -82,27 +82,29 @@ function addCell(board,value,row,col,undoStack,redoStack,asUndo){
         return false
 
     }
+    if(!board[row-1][col-1]["updatable"])
+    {
+        console.log("intial cell cannot be updated")
+        return false
+    }
     if(value<1||value>9){
         console.log("Enter Valid Value")
         return false
     }
-    if(board[row-1][col-1]===value)
+
+    if(board[row-1][col-1].value===value)
         {console.log("same value")
         return false}
-    // if(board[row-1][col]["updatable"]===false)
-    // {
-    //     console.log("cell cannot be updated")
-    //     return false
-    // }
+    
 
-    if(board[row-1].slice(0,col-1).concat(board[row-1].slice(col)).includes(value)){
+    if(board[row-1].slice(0,col-1).concat(board[row-1].slice(col)).map(elem=>elem.value).includes(value)){
         console.log(`ROW ${row} contains value ${value}`  )
         return false}
         
     //check column
     for(let j =0;j<9;j++)
     {
-        if(j!=row-1&&board[j][col-1]===value){
+        if(j!=row-1&&board[j][col-1].value===value){
             console.log(`COLUMN ${col} contains value ${value}`  )
         return false}
             
@@ -118,27 +120,32 @@ function addCell(board,value,row,col,undoStack,redoStack,asUndo){
         console.log(`small square contains value ${value}`)
         return false}
         if(!asUndo){
-    undoStack.push([row-1,col-1,board[row-1][col-1]])
+    undoStack.push([row-1,col-1,board[row-1][col-1].value])
     redoStack.length=0}
-    board[row-1][col-1]=value
+    board[row-1][col-1].value=value
     return true
         
 }
 function deleteCell(board,row,col,undoStack,redoStack,asUndo){
-    if(row<1||row>9||col<1||col>9){
-        console.log("Enter valid Position")
+    if(row<1||row>9||col<1||col>9)
+        {console.log("Enter valid Position")
+        return false}
+    if(!board[row-1][col-1].updatable){
+        console.log("cannot delete  intial cell")
         return false
 
-    }
-    if(board[row-1][col-1]===0)
+    } 
+
+    
+    if(board[row-1][col-1].value===0)
         {console.log("already empty cell")
         return false}
         if(!asUndo){
-    undoStack.push([row-1,col-1,board[row-1][col-1]]) 
+    undoStack.push([row-1,col-1,board[row-1][col-1].value]) 
     redoStack.length=0} 
     
         
-    board[row-1][col-1]=0
+    board[row-1][col-1].value=0
     
     return true
 
@@ -147,7 +154,7 @@ function deleteCell(board,row,col,undoStack,redoStack,asUndo){
 function undo(board,undoStack,redoStack){
     if(undoStack.length!=0){
         console.log(undoStack[undoStack.length-1])
-        redoStack.push([undoStack[undoStack.length-1][0],undoStack[undoStack.length-1][1],board[undoStack[undoStack.length-1][0]][undoStack[undoStack.length-1][1]]])
+        redoStack.push([undoStack[undoStack.length-1][0],undoStack[undoStack.length-1][1],board[undoStack[undoStack.length-1][0]][undoStack[undoStack.length-1][1]].value])
       
     if(undoStack[undoStack.length-1][2]===0){
         deleteCell(board,undoStack[undoStack.length-1][0]+1,undoStack[undoStack.length-1][1]+1,undoStack,redoStack,true)
@@ -198,9 +205,9 @@ function draw(board){
        let thirdLine=""
        for(let j =0;j<9;j++){
         if(j%3===0)
-              thirdLine+=`\x1b[97m|\x1b[90m   ${board[i][j]}   `
+              thirdLine+=`\x1b[97m|${!board[i][j].updatable?'\x1b[97m':"\u001b[36m"}   ${board[i][j].value===0?' ':board[i][j].value}\x1b[90m   `
             else
-        thirdLine+=`|   ${board[i][j]}   `
+        thirdLine+=`|${!board[i][j].updatable?'\x1b[97m':"\u001b[36m"}   ${board[i][j].value===0?' ':board[i][j].value}\x1b[90m   `
        }
        thirdLine+="\x1b[97m|"
        

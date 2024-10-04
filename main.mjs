@@ -1,12 +1,7 @@
-import { pathToFileURL } from 'url';
 import rd from 'readline'
+import { gamePlay } from './GamePlay.mjs';
+import { generateNewSudoku } from './GenerateAndSolve.mjs';
 
-const filePath = 'E:/Sudoku/GamePlay.mjs';
-const fileUrl = pathToFileURL(filePath).href;
-
-const module = await import(fileUrl); 
-
-const { gamePlay } = module;
 
 
 
@@ -21,19 +16,7 @@ function main(){
         
         switch (ans) {
            case "1":
-            let sudokuBoard = [
-              [0,0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0,0],
-              [1,0,0,0,0,0,0,0,0],
-          
-          ]
-            
+            let sudokuBoard =  generateNewSudoku()
             gamePlay(sudokuBoard)
             break
            case "2":
