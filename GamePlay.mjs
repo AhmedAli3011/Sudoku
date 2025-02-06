@@ -3,6 +3,7 @@ import {
     solveSudoku,
     generateNewSudoku
 } from './GenerateAndSolve.mjs';
+import {save,load} from "./saveAndload.mjs"
 export function gamePlay(board, undoStack = [], redoStack = []) {
     process.stdout.write("\u001b[2J\u001b[0;0H");
     const readline = rd.createInterface({
@@ -31,8 +32,12 @@ export function gamePlay(board, undoStack = [], redoStack = []) {
                         return gamePlay(board, undoStack, redoStack)
                     } else return recursiceReadLine(readline, board)
                 case "s":
-                    save(board)
-
+                   
+                    if(ans[1]!=undefined)
+                        save(board,ans[1]) 
+                    else
+                    console.log("File Name Not Defined")
+                    
                     return recursiceReadLine(readline, board)
                 case "u":
                     if (undo(board, undoStack, redoStack)) {
